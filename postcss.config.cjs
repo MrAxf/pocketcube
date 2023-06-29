@@ -1,14 +1,12 @@
-const postcssPresetEnv = require('postcss-preset-env');
-
 const config = {
-	plugins: [
-		postcssPresetEnv({
-			stage: 3,
-			features: {
-				'nesting-rules': true
-			}
-		})
-	]
+	plugins: {
+		'postcss-import': {},
+		'tailwindcss/nesting': 'postcss-nesting',
+		tailwindcss: {},
+		'postcss-preset-env': {
+			features: { 'nesting-rules': false }
+		}
+	}
 };
 
 module.exports = config;

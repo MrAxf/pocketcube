@@ -2,7 +2,7 @@
 	import CubePiece from '$lib/components/cube-piece.svelte';
 	import { createCubeData, key } from '$lib/cube-context';
 	import {
-	DEG180,
+		DEG180,
 		DEG30,
 		DEG360,
 		DEG45,
@@ -20,25 +20,6 @@
 	let rotationX = DEG360 - DEG30;
 	let rotationY = DEG45;
 	let rotationZ = 0;
-
-	const rotateTop =
-		(reverse: 1 | -1 = 1) =>
-		() => {
-			cubeData.pieces.forEach((value, key) => {
-				if (key.includes('t'))
-					value.update((old) => {
-						const angles = anglesFromMatrix(
-							multiply(
-								rotation3Dmatrix(old.rotationX, old.rotationY, old.rotationZ),
-								rotation3Dmatrix(0, DEG45 * reverse, 0),
-							)
-						);
-						console.log(angles);
-						
-						return angles
-					});
-			});
-		};
 </script>
 
 <div
@@ -49,45 +30,168 @@
         --rotation-z: {rotationZ}rad;
     "
 >
-	<CubePiece front top left />
-	<CubePiece front top />
-	<CubePiece front top right />
-	<CubePiece front left />
-	<CubePiece front />
-	<CubePiece front right />
-	<CubePiece front down left />
-	<CubePiece front down />
-	<CubePiece front down right />
-	<CubePiece top left />
-	<CubePiece top />
-	<CubePiece top right />
-	<CubePiece left />
-	<CubePiece right />
-	<CubePiece down left />
-	<CubePiece down />
-	<CubePiece down right />
-	<CubePiece back top left />
-	<CubePiece back top />
-	<CubePiece back top right />
-	<CubePiece back left />
-	<CubePiece back />
-	<CubePiece back right />
-	<CubePiece back down left />
-	<CubePiece back down />
-	<CubePiece back down right />
+	<!-- Top  -->
+	<CubePiece x={-1} y={-1} z={-1} />
+	<CubePiece x={-1} y={-1} z={0} />
+	<CubePiece x={-1} y={-1} z={1} />
+	<CubePiece x={0} y={-1} z={-1} />
+	<CubePiece x={0} y={-1} z={0} />
+	<CubePiece x={0} y={-1} z={1} />
+	<CubePiece x={1} y={-1} z={-1} />
+	<CubePiece x={1} y={-1} z={0} />
+	<CubePiece x={1} y={-1} z={1} />
+
+	<!-- Mid -->
+	<CubePiece x={-1} y={0} z={-1} />
+	<CubePiece x={-1} y={0} z={0} />
+	<CubePiece x={-1} y={0} z={1} />
+	<CubePiece x={0} y={0} z={-1} />
+	<CubePiece x={0} y={0} z={1} />
+	<CubePiece x={1} y={0} z={-1} />
+	<CubePiece x={1} y={0} z={0} />
+	<CubePiece x={1} y={0} z={1} />
+
+	<!-- Bot -->
+	<CubePiece x={-1} y={1} z={-1} />
+	<CubePiece x={-1} y={1} z={0} />
+	<CubePiece x={-1} y={1} z={1} />
+	<CubePiece x={0} y={1} z={-1} />
+	<CubePiece x={0} y={1} z={0} />
+	<CubePiece x={0} y={1} z={1} />
+	<CubePiece x={1} y={1} z={-1} />
+	<CubePiece x={1} y={1} z={0} />
+	<CubePiece x={1} y={1} z={1} />
 </div>
 
 <label for="angleX" />
-<input id="angleX" type="range" min="0" max={DEG360} step="0.01" bind:value={rotationX} />
+<input id="angleX" type="range" min={-DEG360} max={DEG360} step="0.01" bind:value={rotationX} />
 
 <label for="angleY" />
-<input id="angleY" type="range" min="0" max={DEG360} step="0.01" bind:value={rotationY} />
+<input id="angleY" type="range" min={-DEG360} max={DEG360} step="0.01" bind:value={rotationY} />
 
 <label for="angleZ" />
-<input id="angleZ" type="range" min="0" max={DEG360} step="0.01" bind:value={rotationZ} />
+<input id="angleZ" type="range" min={-DEG360} max={DEG360} step="0.01" bind:value={rotationZ} />
 
-<button on:click={rotateTop()}>Rotate top</button>
-<button on:click={rotateTop(-1)}>Rotate top Reverse</button>
+<button
+	on:click={() => {
+		cubeData.rotate(['top'], false);
+	}}>RotateTopF</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['top'], true);
+	}}>RotateTopR</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['middleY'], false);
+	}}>RotateMidYF</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['middleY'], true);
+	}}>RotateMidYR</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['down'], false);
+	}}>RotateBotF</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['down'], true);
+	}}>RotateBotR</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['front'], false);
+	}}>RotateFrontF</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['front'], true);
+	}}>RotateFrontR</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['middleZ'], false);
+	}}>RotateMidZF</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['middleZ'], true);
+	}}>RotateMidZR</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['back'], false);
+	}}>RotateBackF</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['back'], true);
+	}}>RotateBackR</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['left'], false);
+	}}>RotateLeftF</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['left'], true);
+	}}>RotateLeftR</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['middleX'], false);
+	}}>RotateMidF</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['middleX'], true);
+	}}>RotateMidR</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['right'], false);
+	}}>RotateRightF</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['right'], true);
+	}}>RotateRightR</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['top', 'middleY', 'down'], false);
+	}}>RotateCubeYF</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['top', 'middleY', 'down'], true);
+	}}>RotateCubeYR</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['front', 'middleZ', 'back'], false);
+	}}>RotateCubeZF</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['front', 'middleZ', 'back'], true);
+	}}>RotateCubeZR</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['left', 'middleX', 'right'], false);
+	}}>RotateCubeXF</button
+>
+<button
+	on:click={() => {
+		cubeData.rotate(['left', 'middleX', 'right'], true);
+	}}>RotateCubeXR</button
+>
 
 <style lang="postcss">
 	.cube {
@@ -99,7 +203,8 @@
 		--rotation-x: 0deg;
 		--rotation-y: 0deg;
 		--rotation-z: 0deg;
-		transform: translateX(50vw) translateY(50vh) rotateX(var(--rotation-x))
+		transform: translateX(calc(50vw - calc(var(--cube-size) / 2)))
+			translateY(calc(50vh - calc(var(--cube-size) / 2))) rotateX(var(--rotation-x))
 			rotateY(var(--rotation-y)) rotateZ(var(--rotation-z));
 	}
 </style>

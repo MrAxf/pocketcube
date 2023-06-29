@@ -3,38 +3,76 @@
 	import CubeFace from './cube-face.svelte';
 	import { key, type CubeContextData } from '$lib/cube-context';
 
-    export let front = false
-    export let back = false
-    export let top = false
-    export let down = false
-    export let left = false
-    export let right = false
+	export let x = 0;
+	export let y = 0;
+	export let z = 0;
 
-    let translateX = (Number(right) - Number(left))
-    let translateY = (Number(down) - Number(top))
-    let translateZ = (Number(front) - Number(back))
+	let rotationX = 0;
+	let rotationY = 0;
+	let rotationZ = 0;
 
-	const { getPiece } = getContext<CubeContextData>(key)
-	let piece = getPiece([front, back, top, down, left, right])
+	const facesOrientations = ['top', 'down', 'front', 'back', 'left', 'right'] as (
+		| 'top'
+		| 'down'
+		| 'front'
+		| 'back'
+		| 'left'
+		| 'right'
+	)[];
+
+	const { cubeFaces, rotateTween, facesRotating } = getContext<CubeContextData>(key);
+
+	let faces: (string | undefined)[] = [];
+
+	cubeFaces.subscribe((cubeFaces) => {
+		faces = [
+			y === -1 ? cubeFaces.top[z + 1][x + 1] : undefined, //Top
+			y === 1 ? cubeFaces.down[2 - (z + 1)][x + 1] : undefined, //Down
+			z === 1 ? cubeFaces.front[y + 1][x + 1] : undefined, //Front
+			z === -1 ? cubeFaces.back[y + 1][2 - (x + 1)] : undefined, //Back
+			x === -1 ? cubeFaces.left[y + 1][z + 1] : undefined, //left
+			x === 1 ? cubeFaces.right[y + 1][2 - (z + 1)] : undefined //right
+		];
+	});
+
+	rotateTween.subscribe((rotateTween) => {
+		if (
+			(y === -1 && $facesRotating.includes('top')) ||
+			(y === 0 && $facesRotating.includes('middleY')) ||
+			(y === 1 && $facesRotating.includes('down'))
+		) {
+			rotationY = rotateTween
+		} else if (
+			(z === 1 && $facesRotating.includes('front')) ||
+			(z === 0 && $facesRotating.includes('middleZ')) ||
+			(z === -1 && $facesRotating.includes('back'))
+		) {
+			rotationZ = rotateTween
+		} else if (
+			(x === -1 && $facesRotating.includes('left')) ||
+			(x === 0 && $facesRotating.includes('middleX')) ||
+			(x === 1 && $facesRotating.includes('right'))
+		) {
+			rotationX = -rotateTween
+		}
+	});
 </script>
 
 <div
-	class="cube-piece" style="
-        --translationX: calc(var(--cube-size) * {translateX});
-        --translationY: calc(var(--cube-size) * {translateY});
-        --translationZ: calc(var(--cube-size) * {translateZ});
+	class="cube-piece"
+	style="
+        --translationX: calc(var(--cube-size) * {x});
+        --translationY: calc(var(--cube-size) * {y});
+        --translationZ: calc(var(--cube-size) * {z});
 
-		--rotationX: {$piece?.rotationX || 0}rad;
-        --rotationY: {$piece?.rotationY || 0}rad;
-        --rotationZ: {$piece?.rotationZ || 0}rad;
+		--rotationX: {rotationX}deg;
+        --rotationY: {rotationY}deg;
+        --rotationZ: {rotationZ}deg;
     "
 >
-	<CubeFace showSticker={top} orientation="top" />
-	<CubeFace showSticker={down} orientation="down" />
-	<CubeFace showSticker={front} orientation="front" />
-	<CubeFace showSticker={back} orientation="back" />
-	<CubeFace showSticker={left} orientation="left" />
-	<CubeFace showSticker={right} orientation="right" />
+	{#each faces as face, i}
+		<CubeFace sticker={face} orientation={facesOrientations[i]} />
+	{/each}
 </div>
 
 <style lang="postcss">
@@ -44,10 +82,7 @@
 		transform-style: preserve-3d;
 		width: var(--cube-size);
 		height: var(--cube-size);
-        transform:
-			rotateX(var(--rotationX)) 
-			rotateY(var(--rotationY)) 
-			rotateZ(var(--rotationZ)) 
+		transform: rotateX(var(--rotationX)) rotateY(var(--rotationY)) rotateZ(var(--rotationZ))
 			translate3d(var(--translationX), var(--translationY), var(--translationZ));
 	}
 </style>

@@ -1,6 +1,14 @@
 <script>
-
-	import Cube from "$lib/components/cube.svelte";
-
+	import Cube from '$lib/components/cube.svelte';
 </script>
-<Cube />
+
+<main class="w-screen h-screen transfor">
+	<Cube />
+</main>
+
+<style>
+	main {
+		transform-style: preserve-3d;
+		perspective: 3000px;
+	}
+</style>

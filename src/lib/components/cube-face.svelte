@@ -2,7 +2,7 @@
 	import { DEG180, DEG270, DEG90 } from "$lib/utils/matrix";
 
 	export let orientation: 'top' | 'down' | 'front' | 'back' | 'left' | 'right';
-	export let showSticker: boolean;
+	export let sticker: string | undefined
 
 	let rotationX = 0;
 	let rotationY = 0;
@@ -40,8 +40,8 @@
         --rotation-y: {rotationY}rad;
     "
 >
-	{#if showSticker}
-		<div class="cube-sticker" style="--sticker-color: var(--cube-color-{orientation})" />
+	{#if sticker}
+		<div class="cube-sticker" style="--sticker-color: var(--cube-color-{sticker})" />
 	{/if}
 </div>
 
