@@ -118,7 +118,7 @@
 				axisCalculator(evMovementX, evMovementY);
 			} else {
 				const movement = axis === 'A' ? evMovementX : yMultiplier * evMovementY;
-				rotateTween.update((curr) => curr + movement / 5);
+				rotateTween.update((curr) => curr + movement / 2.5);
 			}
 			if (ev instanceof TouchEvent) {
 				prevTochPosition = [ev.touches[0].clientX, ev.touches[0].clientY];
