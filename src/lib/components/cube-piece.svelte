@@ -93,14 +93,26 @@
 				}
 			};
 		}
+		let prevTochPosition = [0, 0];
+
+		if (ev instanceof TouchEvent) {
+			prevTochPosition = [
+				ev.touches[0].clientX,
+				ev.touches[0].clientY
+			]
+		}
 
 		const onMouseMove = (ev: MouseEvent | TouchEvent) => {
-			ev.preventDefault();
 			let evMovementX = 0;
 			let evMovementY = 0;
 			if (ev instanceof MouseEvent) {
+				ev.preventDefault();
+
 				evMovementX = ev.movementX;
 				evMovementY = ev.movementY;
+			} else if (ev instanceof TouchEvent) {
+				evMovementX = ev.touches[0].clientX - prevTochPosition[0];
+				evMovementY = ev.touches[0].clientY - prevTochPosition[1];
 			}
 			if (!axis) {
 				axisCalculator(evMovementX, evMovementY);
@@ -108,22 +120,36 @@
 				const movement = axis === 'A' ? evMovementX : yMultiplier * evMovementY;
 				rotateTween.update((curr) => curr + movement / 5);
 			}
+			if (ev instanceof TouchEvent) {
+				prevTochPosition = [ev.touches[0].clientX, ev.touches[0].clientY];
+			}
 		};
 		const onMouseUp = (ev: Event) => {
 			ev.preventDefault();
-			rotateDrag($facesRotating, $rotateTween)
-			document.removeEventListener('mousemove', onMouseMove);
-			document.removeEventListener('mouseup', onMouseUp);
+			rotateDrag($facesRotating, $rotateTween);
+			if (ev instanceof MouseEvent) {
+				document.removeEventListener('mousemove', onMouseMove);
+				document.removeEventListener('mouseup', onMouseUp);
+			} else {
+				document.removeEventListener('touchmove', onMouseMove);
+				document.removeEventListener('touchend', onMouseUp);
+			}
 		};
 
-		document.addEventListener('mousemove', onMouseMove);
-		document.addEventListener('mouseup', onMouseUp);
+		if (ev instanceof MouseEvent) {
+			document.addEventListener('mousemove', onMouseMove);
+			document.addEventListener('mouseup', onMouseUp);
+		} else {
+			document.addEventListener('touchmove', onMouseMove);
+			document.addEventListener('touchend', onMouseUp);
+		}
 	}
 </script>
 
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
-	on:mousedown|preventDefault={onMouseDown}
+	on:mousedown|preventDefault|stopPropagation={onMouseDown}
+	on:touchstart|preventDefault|stopPropagation={onMouseDown}
 	class="cube-piece cursor-pointer"
 	style="
         --translationX: calc(var(--cube-size) * {x});
