@@ -11,14 +11,24 @@
 	--cube-color-down: rgb(247, 233, 39);
 	--cube-color-left: rgb(11, 216, 28);
 	--cube-color-right: rgb(2, 83, 206);
+}
 
-	--cube-size: 8rem;
+@media (orientation: landscape) {
+	:root {
+		--cube-size: 15vh;
+	}
+}
+
+@media (orientation: portrait) {
+	:root {
+		--cube-size: 17.5vw;
+	}
 }
 
 @layer base {
-	html, body {
-	width: 100%;
-	height: 100%;
+	html,
+	body {
+		width: 100%;
+		height: 100%;
+	}
 }
-}
-

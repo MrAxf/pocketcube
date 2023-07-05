@@ -2,6 +2,7 @@
 	import { getContext } from 'svelte';
 	import CubeFace from './cube-face.svelte';
 	import { key, type CubeContextData } from '$lib/cube-context';
+	import type { CubeLayer } from '../../types/cube';
 
 	export let x = 0;
 	export let y = 0;
@@ -20,7 +21,7 @@
 		| 'right'
 	)[];
 
-	const { cubeFaces, rotateTween, facesRotating } = getContext<CubeContextData>(key);
+	const { cubeFaces, rotateTween, facesRotating, rotateDrag } = getContext<CubeContextData>(key);
 
 	let faces: (string | undefined)[] = [];
 
@@ -41,25 +42,89 @@
 			(y === 0 && $facesRotating.includes('middleY')) ||
 			(y === 1 && $facesRotating.includes('down'))
 		) {
-			rotationY = rotateTween
+			rotationY = rotateTween;
 		} else if (
 			(z === 1 && $facesRotating.includes('front')) ||
 			(z === 0 && $facesRotating.includes('middleZ')) ||
 			(z === -1 && $facesRotating.includes('back'))
 		) {
-			rotationZ = rotateTween
+			rotationZ = rotateTween;
 		} else if (
 			(x === -1 && $facesRotating.includes('left')) ||
 			(x === 0 && $facesRotating.includes('middleX')) ||
 			(x === 1 && $facesRotating.includes('right'))
 		) {
-			rotationX = -rotateTween
+			rotationX = -rotateTween;
 		}
 	});
+
+	function onMouseDown(ev: Event) {
+		if ($facesRotating.length > 0) return;
+		let axis: 'A' | 'B' | undefined = undefined;
+		let movementX = 0;
+		let movementY = 0;
+		let face = (ev.target as HTMLDivElement).getAttribute('data-face');
+		let posibleLayerA: CubeLayer, posibleLayerB: CubeLayer;
+		let yMultiplier = 1;
+		let axisCalculator = (evMovementX: number, evMovementY: number) => {
+			movementX += Math.abs(evMovementX);
+			movementY += Math.abs(evMovementY);
+			if (movementX > 10 || movementY > 10) {
+				axis = movementX >= movementY ? 'A' : 'B';
+				$facesRotating = [axis === 'A' ? posibleLayerA : posibleLayerB];
+			}
+		};
+		if (face === 'left') {
+			posibleLayerA = ['top', 'middleY', 'down'][y + 1] as CubeLayer;
+			posibleLayerB = ['back', 'middleZ', 'front'][z + 1] as CubeLayer;
+			yMultiplier = -1;
+		} else if (face === 'front') {
+			posibleLayerA = ['top', 'middleY', 'down'][y + 1] as CubeLayer;
+			posibleLayerB = ['left', 'middleX', 'right'][x + 1] as CubeLayer;
+		} else if (face === 'top') {
+			posibleLayerA = ['back', 'middleZ', 'front'][z + 1] as CubeLayer;
+			posibleLayerB = ['left', 'middleX', 'right'][x + 1] as CubeLayer;
+			axisCalculator = (evMovementX: number, evMovementY: number) => {
+				movementX += evMovementX;
+				movementY += evMovementY;
+				if (Math.abs(movementX) > 10 || Math.abs(movementY) > 10) {
+					axis = movementX * movementY < 0 ? 'A' : 'B';
+					$facesRotating = [axis === 'A' ? posibleLayerA : posibleLayerB];
+				}
+			};
+		}
+
+		const onMouseMove = (ev: MouseEvent | TouchEvent) => {
+			ev.preventDefault();
+			let evMovementX = 0;
+			let evMovementY = 0;
+			if (ev instanceof MouseEvent) {
+				evMovementX = ev.movementX;
+				evMovementY = ev.movementY;
+			}
+			if (!axis) {
+				axisCalculator(evMovementX, evMovementY);
+			} else {
+				const movement = axis === 'A' ? evMovementX : yMultiplier * evMovementY;
+				rotateTween.update((curr) => curr + movement / 5);
+			}
+		};
+		const onMouseUp = (ev: Event) => {
+			ev.preventDefault();
+			rotateDrag($facesRotating, $rotateTween)
+			document.removeEventListener('mousemove', onMouseMove);
+			document.removeEventListener('mouseup', onMouseUp);
+		};
+
+		document.addEventListener('mousemove', onMouseMove);
+		document.addEventListener('mouseup', onMouseUp);
+	}
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div
-	class="cube-piece"
+	on:mousedown|preventDefault={onMouseDown}
+	class="cube-piece cursor-pointer"
 	style="
         --translationX: calc(var(--cube-size) * {x});
         --translationY: calc(var(--cube-size) * {y});

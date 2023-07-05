@@ -39,6 +39,7 @@
         --rotation-x: {rotationX}rad;
         --rotation-y: {rotationY}rad;
     "
+	data-face={orientation}
 >
 	{#if sticker}
 		<div class="cube-sticker" style="--sticker-color: var(--cube-color-{sticker})" />
@@ -59,6 +60,7 @@
 		transform: rotateX(var(--rotation-x)) rotateY(var(--rotation-y)) translateZ(calc(var(--cube-size) / 2));
 
 		& .cube-sticker {
+			pointer-events: none;
 			width: 80%;
 			height: 80%;
 			margin: 10%;

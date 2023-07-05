@@ -1,5 +1,8 @@
 import { tweened, type Tweened } from 'svelte/motion';
 import { writable, type Writable } from 'svelte/store';
+import type { CubeLayer } from '../types/cube';
+import nearestMultipleOf90 from './utils/nearesMultipleOf90';
+import repeat from './utils/repeat';
 
 interface CubePiece {
 	rotationX: number;
@@ -9,24 +12,10 @@ interface CubePiece {
 
 interface CubeContextData {
 	cubeFaces: Writable<{ [key: string]: string[][] }>;
-	facesRotating: Writable<
-		('top' | 'middleY' | 'down' | 'front' | 'middleZ' | 'back' | 'left' | 'middleX' | 'right')[]
-	>;
+	facesRotating: Writable<CubeLayer[]>;
 	rotateTween: Tweened<number>;
-	rotate: (
-		faces: (
-			| 'top'
-			| 'middleY'
-			| 'down'
-			| 'front'
-			| 'middleZ'
-			| 'back'
-			| 'left'
-			| 'middleX'
-			| 'right'
-		)[],
-		reverse: boolean
-	) => void;
+	rotate: (faces: CubeLayer[], reverse: boolean) => void;
+	rotateDrag: (faces: CubeLayer[], rotation: number) => void;
 }
 
 const key = Symbol();
@@ -65,9 +54,7 @@ const createCubeData = (): CubeContextData => {
 		]
 	});
 
-	const facesRotating = writable<
-		('top' | 'middleY' | 'down' | 'front' | 'middleZ' | 'back' | 'left' | 'middleX' | 'right')[]
-	>([]);
+	const facesRotating = writable<CubeLayer[]>([]);
 
 	let isRotating = false;
 
@@ -364,20 +351,7 @@ const createCubeData = (): CubeContextData => {
 		}
 	};
 
-	const rotate = async (
-		faces: (
-			| 'top'
-			| 'middleY'
-			| 'down'
-			| 'front'
-			| 'middleZ'
-			| 'back'
-			| 'left'
-			| 'middleX'
-			| 'right'
-		)[],
-		reverse = false
-	) => {
+	const rotate = async (faces: CubeLayer[], reverse = false) => {
 		if (isRotating) return;
 		isRotating = true;
 		facesRotating.set(faces);
@@ -390,11 +364,29 @@ const createCubeData = (): CubeContextData => {
 		isRotating = false;
 	};
 
+	const rotateDrag = async (faces: CubeLayer[], rotation: number) => {
+		if (isRotating) return;
+		isRotating = true;
+		const toRotation = nearestMultipleOf90(rotation)
+		const reverse = rotation < 0
+		const rotations = Math.abs(toRotation / 90);
+		await rotateTween.set(toRotation, { duration: (Math.abs(toRotation - rotation) * 50) / 9 });
+		rotateTween.set(0);
+		faces.forEach((face) => {
+			repeat(() => {
+				rotateFns[face](reverse);
+			}, rotations)
+		});
+		facesRotating.set([]);
+		isRotating = false;
+	};
+
 	return {
 		cubeFaces,
 		facesRotating,
 		rotateTween,
-		rotate
+		rotate,
+		rotateDrag
 	};
 };
 
