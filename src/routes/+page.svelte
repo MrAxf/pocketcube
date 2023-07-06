@@ -6,9 +6,21 @@
 	const cubeData = createCubeData();
 
 	setContext(key, cubeData);
-	const { rotateTween, facesRotating, rotateDrag } = cubeData;
+	const { rotateTween, facesRotating, rotateDrag, rotate } = cubeData;
 
 	function onMouseDown(ev: MouseEvent | TouchEvent) {
+		let clientX = 0;
+
+		let prevTochPosition = [0, 0];
+
+		if (ev instanceof MouseEvent) {
+			if (ev.button !== 0) return;
+			clientX = ev.clientX;
+		} else if (ev instanceof TouchEvent) {
+			prevTochPosition = [ev.touches[0].clientX, ev.touches[0].clientY];
+			clientX = ev.touches[0].clientX;
+		}
+
 		if ($facesRotating.length > 0) return;
 		let axis: 'A' | 'B' | undefined = undefined;
 		let movementX = 0;
@@ -24,17 +36,7 @@
 				$facesRotating = axis === 'A' ? posibleLayersA : posibleLayersB;
 			}
 		};
-		let clientX = 0
 
-		let prevTochPosition = [0, 0];
-
-		if (ev instanceof MouseEvent) {
-			clientX = ev.clientX
-		} else if (ev instanceof TouchEvent) {
-			prevTochPosition = [ev.touches[0].clientX, ev.touches[0].clientY];
-			clientX = ev.touches[0].clientX
-		}
-		
 		if (clientX / globalThis.innerWidth < 0.5) {
 			posibleLayersB = ['back', 'middleZ', 'front'];
 			yMultiplier = -1;
@@ -86,8 +88,57 @@
 			document.addEventListener('touchend', onMouseUp);
 		}
 	}
+
+	function onKeyPress(ev: KeyboardEvent) {
+		console.log(ev);
+
+		let faces: CubeLayer[] = [];
+		switch (ev.key.toLocaleLowerCase()) {
+			case 'f':
+				faces = ['front'];
+				break;
+
+			case 'b':
+				faces = ['back'];
+				break;
+
+			case 'u':
+				faces = ['top'];
+				break;
+
+			case 'l':
+				faces = ['left'];
+				break;
+
+			case 'r':
+				faces = ['right'];
+				break;
+
+			case 'd':
+				faces = ['down'];
+				break;
+
+			case 'x':
+				faces = ['left', 'middleX', 'right'];
+				break;
+
+			case 'y':
+				faces = ['top', 'middleY', 'down'];
+				break;
+
+			case 'z':
+				faces = ['front', 'middleZ', 'back'];
+				break;
+
+			default:
+				break;
+		}
+		if (faces.length === 0) return;
+		rotate(faces, ev.shiftKey);
+	}
 </script>
 
+<svelte:document on:keypress={onKeyPress} />
 <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
 <main
 	class="w-screen h-screen"

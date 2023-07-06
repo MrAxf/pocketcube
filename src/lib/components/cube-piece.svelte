@@ -59,6 +59,7 @@
 	});
 
 	function onMouseDown(ev: Event) {
+		if (ev instanceof MouseEvent && ev.button !== 0) return
 		if ($facesRotating.length > 0) return;
 		let axis: 'A' | 'B' | undefined = undefined;
 		let movementX = 0;
