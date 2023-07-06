@@ -62,7 +62,7 @@ const createCubeData = (): CubeContextData => {
 		duration: 0
 	});
 
-	const rotateFns = {
+	const rotateFns = Object.freeze({
 		top(reverse = false) {
 			cubeFaces.update((cubeFaces) => {
 				const newCubeFaces = structuredClone(cubeFaces);
@@ -349,7 +349,7 @@ const createCubeData = (): CubeContextData => {
 				return newCubeFaces;
 			});
 		}
-	};
+	});
 
 	const rotate = async (faces: CubeLayer[], reverse = false) => {
 		if (isRotating) return;
@@ -357,25 +357,31 @@ const createCubeData = (): CubeContextData => {
 		facesRotating.set(faces);
 		await rotateTween.set(reverse ? -90 : 90, { duration: 500 });
 		rotateTween.set(0);
-		faces.forEach((face) => {
-			rotateFns[face](reverse);
-		});
-		facesRotating.set([]);
-		isRotating = false;
+		try {
+			faces.forEach((face) => {
+				rotateFns[face](reverse);
+			});
+		} catch (error) {
+			console.error(error, faces, rotateFns);
+			
+		} finally {
+			facesRotating.set([]);
+			isRotating = false;
+		}
 	};
 
 	const rotateDrag = async (faces: CubeLayer[], rotation: number) => {
 		if (isRotating) return;
 		isRotating = true;
-		const toRotation = nearestMultipleOf90(rotation)
-		const reverse = rotation < 0
+		const toRotation = nearestMultipleOf90(rotation);
+		const reverse = rotation < 0;
 		const rotations = Math.abs(toRotation / 90);
 		await rotateTween.set(toRotation, { duration: (Math.abs(toRotation - rotation) * 50) / 9 });
 		rotateTween.set(0);
 		faces.forEach((face) => {
 			repeat(() => {
 				rotateFns[face](reverse);
-			}, rotations)
+			}, rotations);
 		});
 		facesRotating.set([]);
 		isRotating = false;

@@ -97,8 +97,6 @@
 	}
 
 	function onKeyPress(ev: KeyboardEvent) {
-		console.log(ev);
-
 		let faces: CubeLayer[] = [];
 		switch (ev.key.toLocaleLowerCase()) {
 			case 'f':

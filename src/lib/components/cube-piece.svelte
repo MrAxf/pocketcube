@@ -25,16 +25,16 @@
 
 	let faces: (string | undefined)[] = [];
 
-	cubeFaces.subscribe((cubeFaces) => {
+	$: {
 		faces = [
-			y === -1 ? cubeFaces.top[z + 1][x + 1] : undefined, //Top
-			y === 1 ? cubeFaces.down[2 - (z + 1)][x + 1] : undefined, //Down
-			z === 1 ? cubeFaces.front[y + 1][x + 1] : undefined, //Front
-			z === -1 ? cubeFaces.back[y + 1][2 - (x + 1)] : undefined, //Back
-			x === -1 ? cubeFaces.left[y + 1][z + 1] : undefined, //left
-			x === 1 ? cubeFaces.right[y + 1][2 - (z + 1)] : undefined //right
+			y === -1 ? $cubeFaces.top[z + 1][x + 1] : undefined, //Top
+			y === 1 ? $cubeFaces.down[2 - (z + 1)][x + 1] : undefined, //Down
+			z === 1 ? $cubeFaces.front[y + 1][x + 1] : undefined, //Front
+			z === -1 ? $cubeFaces.back[y + 1][2 - (x + 1)] : undefined, //Back
+			x === -1 ? $cubeFaces.left[y + 1][z + 1] : undefined, //left
+			x === 1 ? $cubeFaces.right[y + 1][2 - (z + 1)] : undefined //right
 		];
-	});
+	}
 
 	rotateTween.subscribe((rotateTween) => {
 		if (
