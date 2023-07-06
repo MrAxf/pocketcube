@@ -10,15 +10,18 @@
 
 	function onMouseDown(ev: MouseEvent | TouchEvent) {
 		let clientX = 0;
+		let clientY = 0;
 
 		let prevTochPosition = [0, 0];
 
 		if (ev instanceof MouseEvent) {
 			if (ev.button !== 0) return;
 			clientX = ev.clientX;
+			clientY = ev.clientY;
 		} else if (ev instanceof TouchEvent) {
 			prevTochPosition = [ev.touches[0].clientX, ev.touches[0].clientY];
 			clientX = ev.touches[0].clientX;
+			clientY = ev.touches[0].clientY;
 		}
 
 		if ($facesRotating.length > 0) return;
@@ -27,6 +30,7 @@
 		let movementY = 0;
 		let posibleLayersA: CubeLayer[] = ['top', 'middleY', 'down'],
 			posibleLayersB: CubeLayer[];
+		let xMultiplier = 1;
 		let yMultiplier = 1;
 		let axisCalculator = (evMovementX: number, evMovementY: number) => {
 			movementX += Math.abs(evMovementX);
@@ -34,6 +38,9 @@
 			if (movementX > 10 || movementY > 10) {
 				axis = movementX >= movementY ? 'A' : 'B';
 				$facesRotating = axis === 'A' ? posibleLayersA : posibleLayersB;
+				if (axis === 'A') {					
+					xMultiplier = (clientY / globalThis.innerHeight < 0.5) ? -1 : 1;
+				}
 			}
 		};
 
@@ -59,7 +66,7 @@
 			if (!axis) {
 				axisCalculator(evMovementX, evMovementY);
 			} else {
-				const movement = axis === 'A' ? evMovementX : yMultiplier * evMovementY;
+				const movement = axis === 'A' ? xMultiplier * evMovementX : yMultiplier * evMovementY;
 				rotateTween.update((curr) => curr + movement / 2.5);
 			}
 
