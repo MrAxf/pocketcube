@@ -2,7 +2,7 @@
 	import { getContext } from 'svelte';
 	import CubeFace from './cube-face.svelte';
 	import { key, type CubeContextData } from '$lib/cube-context';
-	import type { CubeLayer } from '../../types/cube';
+	import type { CubeLayer, FaceOrientation } from '../../types/cube';
 
 	export let x = 0;
 	export let y = 0;
@@ -12,14 +12,7 @@
 	let rotationY = 0;
 	let rotationZ = 0;
 
-	const facesOrientations = ['top', 'down', 'front', 'back', 'left', 'right'] as (
-		| 'top'
-		| 'down'
-		| 'front'
-		| 'back'
-		| 'left'
-		| 'right'
-	)[];
+	const facesOrientations: FaceOrientation[] = ['top', 'down', 'front', 'back', 'left', 'right']
 
 	const { cubeFaces, rotateTween, facesRotating, rotateDrag } = getContext<CubeContextData>(key);
 
@@ -61,20 +54,24 @@
 	function onMouseDown(ev: Event) {
 		if (ev instanceof MouseEvent && ev.button !== 0) return
 		if ($facesRotating.length > 0) return;
+
 		let axis: 'A' | 'B' | undefined = undefined;
 		let movementX = 0;
 		let movementY = 0;
 		let face = (ev.target as HTMLDivElement).getAttribute('data-face');
 		let posibleLayerA: CubeLayer, posibleLayerB: CubeLayer;
 		let yMultiplier = 1;
+
 		let axisCalculator = (evMovementX: number, evMovementY: number) => {
 			movementX += Math.abs(evMovementX);
 			movementY += Math.abs(evMovementY);
+
 			if (movementX > 10 || movementY > 10) {
 				axis = movementX >= movementY ? 'A' : 'B';
 				$facesRotating = [axis === 'A' ? posibleLayerA : posibleLayerB];
 			}
 		};
+
 		if (face === 'left') {
 			posibleLayerA = ['top', 'middleY', 'down'][y + 1] as CubeLayer;
 			posibleLayerB = ['back', 'middleZ', 'front'][z + 1] as CubeLayer;
@@ -85,15 +82,18 @@
 		} else if (face === 'top') {
 			posibleLayerA = ['back', 'middleZ', 'front'][z + 1] as CubeLayer;
 			posibleLayerB = ['left', 'middleX', 'right'][x + 1] as CubeLayer;
+
 			axisCalculator = (evMovementX: number, evMovementY: number) => {
 				movementX += evMovementX;
 				movementY += evMovementY;
+
 				if (Math.abs(movementX) > 10 || Math.abs(movementY) > 10) {
 					axis = movementX * movementY < 0 ? 'A' : 'B';
 					$facesRotating = [axis === 'A' ? posibleLayerA : posibleLayerB];
 				}
 			};
 		}
+
 		let prevTochPosition = [0, 0];
 
 		if (ev instanceof TouchEvent) {
@@ -106,6 +106,7 @@
 		const onMouseMove = (ev: MouseEvent | TouchEvent) => {
 			let evMovementX = 0;
 			let evMovementY = 0;
+
 			if (ev instanceof MouseEvent) {
 				ev.preventDefault();
 
@@ -115,6 +116,7 @@
 				evMovementX = ev.touches[0].clientX - prevTochPosition[0];
 				evMovementY = ev.touches[0].clientY - prevTochPosition[1];
 			}
+
 			if (!axis) {
 				axisCalculator(evMovementX, evMovementY);
 			} else {
@@ -127,7 +129,9 @@
 		};
 		const onMouseUp = (ev: Event) => {
 			ev.preventDefault();
+
 			rotateDrag($facesRotating, $rotateTween);
+			
 			if (ev instanceof MouseEvent) {
 				document.removeEventListener('mousemove', onMouseMove);
 				document.removeEventListener('mouseup', onMouseUp);

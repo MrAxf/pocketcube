@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { DEG180, DEG270, DEG90 } from "$lib/utils/matrix";
+	import type { FaceOrientation } from "../../types/cube";
 
-	export let orientation: 'top' | 'down' | 'front' | 'back' | 'left' | 'right';
+	export let orientation: FaceOrientation;
 	export let sticker: string | undefined
 
 	let rotationX = 0;

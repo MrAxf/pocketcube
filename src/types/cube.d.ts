@@ -8,3 +8,5 @@ export type CubeLayer =
 	| 'left'
 	| 'middleX'
 	| 'right';
+
+export type FaceOrientation = 'top' | 'down' | 'front' | 'back' | 'left' | 'right';
