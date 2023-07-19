@@ -96,7 +96,7 @@
 
 		let prevTochPosition = [0, 0];
 
-		if (ev instanceof TouchEvent) {
+		if (globalThis.TouchEvent && ev instanceof TouchEvent) {
 			prevTochPosition = [
 				ev.touches[0].clientX,
 				ev.touches[0].clientY
@@ -112,7 +112,7 @@
 
 				evMovementX = ev.movementX;
 				evMovementY = ev.movementY;
-			} else if (ev instanceof TouchEvent) {
+			} else if (globalThis.TouchEvent && ev instanceof TouchEvent) {
 				evMovementX = ev.touches[0].clientX - prevTochPosition[0];
 				evMovementY = ev.touches[0].clientY - prevTochPosition[1];
 			}
@@ -123,7 +123,7 @@
 				const movement = axis === 'A' ? evMovementX : yMultiplier * evMovementY;
 				rotateTween.update((curr) => curr + movement / 2.5);
 			}
-			if (ev instanceof TouchEvent) {
+			if (globalThis.TouchEvent && ev instanceof TouchEvent) {
 				prevTochPosition = [ev.touches[0].clientX, ev.touches[0].clientY];
 			}
 		};
