@@ -1,8 +1,12 @@
 <script lang="ts">
 	import Cube from '$lib/components/cube.svelte';
 	import { createCubeData, key } from '$lib/cube-context';
-	import { setContext } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 	import type { CubeLayer } from '../../types/cube';
+	import repeat from '$lib/utils/repeat';
+
+	export let shuffle: boolean = false;
+
 	const cubeData = createCubeData();
 
 	setContext(key, cubeData);
@@ -25,7 +29,7 @@
 		}
 
 		if ($facesRotating.length > 0) return;
-		
+
 		let axis: 'A' | 'B' | undefined = undefined;
 		let movementX = 0;
 		let movementY = 0;
@@ -149,6 +153,29 @@
 		if (faces.length === 0) return;
 		rotate(faces, ev.shiftKey);
 	}
+
+	onMount(async () => {
+		if (shuffle) {
+			const layers: CubeLayer[] = [
+				'top',
+				'middleY',
+				'down',
+				'front',
+				'middleZ',
+				'back',
+				'left',
+				'middleX',
+				'right'
+			];
+			let prevIndex: number | undefined = undefined;
+			repeat(async () => {
+				let randomIndex = Math.floor(Math.random() * layers.length);
+				if (prevIndex === randomIndex) randomIndex = (randomIndex + 1) % layers.length;
+				prevIndex = randomIndex;
+				await rotate([layers[randomIndex]], Math.random() < 0.5, 250);
+			}, 25);
+		}
+	});
 </script>
 
 <svelte:document on:keypress={onKeyPress} />

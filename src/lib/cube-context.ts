@@ -14,7 +14,7 @@ interface CubeContextData {
 	cubeFaces: Writable<{ [key: string]: string[][] }>;
 	facesRotating: Writable<CubeLayer[]>;
 	rotateTween: Tweened<number>;
-	rotate: (faces: CubeLayer[], reverse: boolean) => void;
+	rotate: (faces: CubeLayer[], reverse: boolean, duration?: number) => void;
 	rotateDrag: (faces: CubeLayer[], rotation: number) => void;
 }
 
@@ -351,11 +351,11 @@ const createCubeData = (): CubeContextData => {
 		}
 	});
 
-	const rotate = async (faces: CubeLayer[], reverse = false) => {
+	const rotate = async (faces: CubeLayer[], reverse = false, duration = 500) => {
 		if (isRotating) return;
 		isRotating = true;
 		facesRotating.set(faces);
-		await rotateTween.set(reverse ? -90 : 90, { duration: 500 });
+		await rotateTween.set(reverse ? -90 : 90, { duration });
 		rotateTween.set(0);
 		try {
 			faces.forEach((face) => {
@@ -363,7 +363,7 @@ const createCubeData = (): CubeContextData => {
 			});
 		} catch (error) {
 			console.error(error, faces, rotateFns);
-			
+
 		} finally {
 			facesRotating.set([]);
 			isRotating = false;

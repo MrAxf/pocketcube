@@ -3,14 +3,14 @@
 @tailwind utilities;
 
 :root {
-	--cube-background: rgb(27, 27, 27);
+	--cube-background: theme(colors.gray.950);
 
-	--cube-color-top: rgb(255, 255, 255);
-	--cube-color-front: rgb(218, 13, 13);
-	--cube-color-back: rgb(252, 148, 13);
-	--cube-color-down: rgb(247, 233, 39);
-	--cube-color-left: rgb(11, 216, 28);
-	--cube-color-right: rgb(2, 83, 206);
+	--cube-color-top: theme(colors.gray.50);
+	--cube-color-front: theme(colors.red.600);
+	--cube-color-back: theme(colors.orange.500);
+	--cube-color-down: theme(colors.yellow.400);
+	--cube-color-left: theme(colors.lime.500);
+	--cube-color-right: theme(colors.blue.500);
 }
 
 @media (orientation: landscape) {
@@ -31,5 +31,7 @@
 		overscroll-behavior: contain;
 		width: 100%;
 		height: 100%;
+		overflow: hidden;
+		position: relative;
 	}
 }
